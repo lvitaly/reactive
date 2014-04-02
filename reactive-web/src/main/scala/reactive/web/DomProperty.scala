@@ -2,8 +2,7 @@ package reactive
 package web
 
 import scala.xml.{ Elem, MetaData, NodeSeq, Null, UnprefixedAttribute }
-import javascript._
-
+import org.jscala.{ javascript => js, _ }
 import scala.ref.WeakReference
 
 /**
@@ -50,7 +49,9 @@ class DomProperty(val name: String)(implicit config: CanRenderDomMutationConfig)
   /**
    * The javascript expression that evaluates to the value of this property
    */
-  def readJS(id: String): JsExp[JsTypes.JsAny] = window.document.getElementById(id).get(name)
+  def readJS(id: String): JsExpr = js {
+    window.document.getElementById(id).get(name)
+  }
 
   /**
    * Registers a Page with this JSProperty.
@@ -182,10 +183,10 @@ object DomProperty {
   /**
    * An implicit `CanForwardJs` instance for `DomProperty`s.
    */
-  implicit def canForwardJs[A <: JsTypes.JsAny](implicit page: Page): CanForwardJs[DomProperty, A] = new CanForwardJs[DomProperty, A] {
-    def forward(s: JsForwardable[A], t: DomProperty) =
-      s.foreach{ x: JsExp[A] => t.readJS(t.id).asInstanceOf[Assignable[A]] := x }
-  }
+  // implicit def canForwardJs[A <: JsTypes.JsAny](implicit page: Page): CanForwardJs[DomProperty, A] = new CanForwardJs[DomProperty, A] {
+    // def forward(s: JsForwardable[A], t: DomProperty) =
+      // s.foreach{ x: JsExp[A] => t.readJS(t.id).asInstanceOf[Assignable[A]] := x }
+  // }
 
   /**
    * DomProperty factory. Just calls the constructor.
