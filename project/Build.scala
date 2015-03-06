@@ -23,7 +23,7 @@ object ReactiveBuild extends Build {
       "Java.net Maven2 Repository" at "http://download.java.net/maven/2/"
     ),
     checksums in update := Nil,
-    scalacOptions in (Compile, compile) += "-deprecation",
+    scalacOptions in (Compile, compile) ++= Seq("-deprecation", "-target:jvm-1.7"),
     (scalacOptions in (Compile, doc) <++= (baseDirectory).map{ bd =>
       val sourceUrl = "http://github.com/nafg/reactive/blob/master/" + bd.getName + "€{FILE_PATH}.scala"
       Seq("-sourcepath", bd.getAbsolutePath, "-doc-source-url", sourceUrl, "-doc-title", "Scaladocs - scala-reactive", "-groups")
