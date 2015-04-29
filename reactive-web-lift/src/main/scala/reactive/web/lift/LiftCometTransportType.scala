@@ -4,6 +4,7 @@ package lift
 
 import java.util.concurrent.TimeUnit
 
+import net.liftweb.util.ThreadGlobal
 import scala.concurrent.duration.Duration
 import scala.xml.{ NodeSeq, Null, UnprefixedAttribute }
 import net.liftweb.common._
@@ -43,6 +44,8 @@ object LiftCometTransportType {
   }
 }
 
+object ProcessingCometTransport extends ThreadGlobal[Boolean]
+
 class LiftCometTransportType(page: Page) extends TransportType with HasLogger {
   // Promise that comet actor will be initialized.
   val initPromise = Promise[Box[String]]()
@@ -50,6 +53,9 @@ class LiftCometTransportType(page: Page) extends TransportType with HasLogger {
 
   class PageComet extends CometActor {
     // Make initCometActor accessible
+
+    override protected def around[R](f: => R) = ProcessingCometTransport.doWith(true) { super.around(f) }
+
     override protected[web] def initCometActor(s: LiftSession, t: Box[String], n: Box[String], x: NodeSeq, a: Map[String, String]): Unit = {
       super.initCometActor(s, t, n, x, a)
       initPromise success t
