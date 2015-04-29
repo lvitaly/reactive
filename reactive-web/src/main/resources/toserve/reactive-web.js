@@ -188,14 +188,33 @@ window.reactive = {
       this.error(e);
     }
   },
+  smartReplace: function(el, content) {
+    try {
+      if (content.indexOf('<') == 0 && $) {
+        $(el).html($(content))
+      } else {
+        el.innerHTML = content;
+      }
+    } catch (e) {
+      reactive.error(e);
+    }
+  },
   replaceAll : function(parentId, innerHtml) {
     try {
       var p = document.getElementById(parentId);
-      if (!p)
-        this.error("Error in replaceAll('" + parentId + "','" + innerHtml
-            + "'): no element " + parentId);
-      else
-        p.innerHTML = innerHtml;
+      if (!p) {
+        setTimeout(function() {
+            p = document.getElementById(parentId);
+            if (!p)
+                reactive.error("Error in replaceAll('" + parentId + "','" +
+                    innerHtml + "'): no element " + parentId);
+            else {
+              reactive.smartReplace(p, innerHtml);
+            }
+        }, 200);
+      } else {
+        reactive.smartReplace(p, innerHtml);
+      }
     } catch (e) {
       this.error(e);
     }
@@ -203,9 +222,16 @@ window.reactive = {
   updateProperty : function(parentId, propertyName, value) {
     try {
       var p = document.getElementById(parentId);
-      if (!p)
-        this.error("Error in updateProperty('" + parentId + "','"
-            + propertyName + "'," + value + "): no element " + parentId);
+      if (!p) {
+          setTimeout(function() {
+              p = document.getElementById(parentId);
+              if (!p)
+                  reactive.error("Error in updateProperty('" + parentId + "','"
+                  + propertyName + "'," + value + "): no element " + parentId);
+              else
+                  p[propertyName] = value;
+          }, 200);
+      }
       else
         p[propertyName] = value;
     } catch (e) {
