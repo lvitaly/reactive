@@ -2,6 +2,7 @@ package reactive
 package web
 package lift
 
+import java.util.{Date, Timer, TimerTask}
 import java.util.concurrent.TimeUnit
 
 import net.liftweb.util.ThreadGlobal
@@ -12,7 +13,7 @@ import net.liftweb.util.Helpers._
 import net.liftweb.http._
 import net.liftweb.http.js.{ JsCmd, JsCmds }
 
-import reactive.logging.HasLogger
+import reactive.logging.{LogLevel, HasLogger}
 
 import scala.concurrent._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -41,6 +42,26 @@ object LiftCometTransportType {
         comet
     }
     initted = true
+  }
+}
+
+case class TryFlush()
+
+private object _timer extends Timer("PageComet daemon", true) with Logger {
+  case class ExceptionRunningTask(throwable: Throwable)
+  private def timerTask(block: =>Unit) = new TimerTask {
+    def run =
+      try
+        block
+      catch {
+        case e: Throwable =>
+          error(ExceptionRunningTask(e))
+      }
+  }
+  def schedule(delay: Long)(p: =>Unit): TimerTask = {
+    val tt = timerTask(p)
+    super.schedule(tt, delay)
+    tt
   }
 }
 
@@ -73,10 +94,41 @@ class LiftCometTransportType(page: Page) extends TransportType with HasLogger {
 
   val comet = new PageComet
 
+  /**
+   * - Append commands to StringBuilder
+   * - Schedule flush in 10 ms
+   * - Don't allow adding more items to queue during flush
+   */
+  class TransportBuffer {
+    private val buffer = new StringBuilder
+
+    var tt: Option[TimerTask] = None
+
+    def add(js: String) = this.synchronized {
+      buffer.append(js).append(";\n")
+      if (tt.isEmpty) {
+        tt = Some(_timer.schedule(20) {
+          flush()
+        })
+      }
+    }
+
+    private def flush() = this.synchronized {
+      comet ! JsCmds.Run(buffer.toString)
+      buffer.clear()
+      tt = None
+    }
+
+  }
+
   object cometTransport extends Transport {
     def currentPriority: Int = 0
 
-    queued foreach { renderable => comet ! JsCmds.Run(renderable.render) }
+    private val transportBuffer = new TransportBuffer
+
+    queued foreach { renderable =>
+      transportBuffer.add(renderable.render)
+    }
   }
 
   LiftCometTransportType.overrideCometHack(comet) {

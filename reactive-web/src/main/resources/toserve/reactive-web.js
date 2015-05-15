@@ -200,42 +200,35 @@ window.reactive = {
     }
   },
   replaceAll : function(parentId, innerHtml) {
-    try {
-      var p = document.getElementById(parentId);
-      if (!p) {
-        setTimeout(function() {
-            p = document.getElementById(parentId);
-            if (!p)
-                reactive.error("Error in replaceAll('" + parentId + "','" +
-                    innerHtml + "'): no element " + parentId);
-            else {
-              reactive.smartReplace(p, innerHtml);
-            }
-        }, 200);
-      } else {
-        reactive.smartReplace(p, innerHtml);
-      }
-    } catch (e) {
-      this.error(e);
+    var maxTries = 300;
+    function doReplace() {
+        var p = document.getElementById(parentId);
+        if (!p && maxTries != 0) {
+            setTimeout(doReplace, 150);
+        } else if (!p) {
+            reactive.error("Error in replaceAll('" + parentId + "','" +
+                innerHtml + "'): no element " + parentId);
+        } else {
+            reactive.smartReplace(p, innerHtml);
+        }
+        maxTries = maxTries - 1;
     }
+    doReplace();
   },
   updateProperty : function(parentId, propertyName, value) {
-    try {
-      var p = document.getElementById(parentId);
-      if (!p) {
-          setTimeout(function() {
-              p = document.getElementById(parentId);
-              if (!p)
-                  reactive.error("Error in updateProperty('" + parentId + "','"
-                  + propertyName + "'," + value + "): no element " + parentId);
-              else
-                  p[propertyName] = value;
-          }, 200);
+      var maxTries = 300;
+      function doUpdate() {
+          var p = document.getElementById(parentId);
+          if (!p && maxTries != 0) {
+              setTimeout(doUpdate, 150);
+          } else if (!p) {
+              reactive.error("Error in updateProperty('" + parentId + "','"
+                + propertyName + "'," + value + "): no element " + parentId);
+          } else {
+              p[propertyName] = value;
+          }
+          maxTries = maxTries - 1;
       }
-      else
-        p[propertyName] = value;
-    } catch (e) {
-      this.error(e);
-    }
+      doUpdate();
   }
 };
