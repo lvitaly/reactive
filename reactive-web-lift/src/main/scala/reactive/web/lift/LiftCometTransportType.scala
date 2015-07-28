@@ -79,7 +79,14 @@ class LiftCometTransportType(page: Page) extends TransportType with HasLogger {
 
     override protected[web] def initCometActor(s: LiftSession, t: Box[String], n: Box[String], x: NodeSeq, a: Map[String, String]): Unit = {
       super.initCometActor(s, t, n, x, a)
-      initPromise success t
+    }
+
+    override protected def localSetup(): Unit = {
+      initPromise success Full("Actor has started")
+    }
+
+    override protected def localShutdown(): Unit = {
+      unlinkTransport(cometTransport)
     }
 
     override def lifespan = Full(60.seconds)
