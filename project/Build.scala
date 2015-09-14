@@ -15,7 +15,9 @@ object ReactiveBuild extends Build {
       "-doc-source-url",
       s"http://github.com/nafg/reactive/blob/$branchName/${ baseDirectory.value.getName }€{FILE_PATH}.scala",
       "-doc-title",
-      "Scaladocs - scala-reactive", "-groups"
+      "Scaladocs - scala-reactive", "-groups",
+      "-Ydelambdafy:method",
+      "-Ybackend:GenBCode"
     ),
     testOptions in Test += Tests.Argument(TestFrameworks.ScalaTest, "-oF"),
     autoAPIMappings := true
