@@ -95,9 +95,8 @@ class DomEventSource[T <: DomEvent: ClassTag: EventEncoder] extends Logger {
   def addEventData[T <: JsAny](jsExp: $[T], es: JsEventStream[T])(implicit page: Page) = eventData.synchronized {
     val ed = EventData(jsExp, es)
     eventData(page) = eventData.get(page) match {
-      case Some(eds) =>
-        eds :+ ed
-      case None => ed :: Nil
+      case Some(eds) => eds :+ ed
+      case None      => ed :: Nil
     }
   }
 
@@ -159,4 +158,8 @@ object DomEventSource {
    * Creates a new Change DomEventSource
    */
   def change = new DomEventSource[Change]
+  /**
+   * Creates a new Blur DomEventSource
+   */
+  def blur = new DomEventSource[Blur]
 }
