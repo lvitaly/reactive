@@ -1,9 +1,10 @@
 package reactive
 package web
 
-import scala.xml.{ Elem, MetaData, NodeSeq, Null, UnprefixedAttribute }
+import net.liftweb.util.ThreadGlobal
+import reactive.web.javascript.{$, JsLiterable, JsTypes}
 
-import javascript.{ $, JsLiterable, JsTypes }
+import scala.xml.{Elem, NodeSeq}
 
 /**
  * Instances of this trait specify how to encode element property values to the client
@@ -77,7 +78,8 @@ object PropertyVar {
      * @return          A `PropertyVar[A]` with the specified time-varying value
      * @example {{{PropertyVar.value fromSignal mySignal}}}
      */
-    def fromSignal[A](signal: Signal[A])(implicit codec: PropertyCodec[A], observing: Observing, config: CanRenderDomMutationConfig): PropertyVar[A] = new PropertyVar[A](dom(config))(signal.now) <<: signal.change
+    def fromSignal[A](signal: Signal[A])(implicit codec: PropertyCodec[A], observing: Observing, config: CanRenderDomMutationConfig): PropertyVar[A] =
+      new PropertyVar[A](dom(config))(signal.now) <<: signal.change
 
     /**
      * A function that renders a `PropertyVar` synced from a `Signal` based on the attribute's initial value
@@ -91,12 +93,13 @@ object PropertyVar {
      *  }
      * }}}
      */
-    def transform[A](f: Option[String] => Signal[A])(implicit codec: PropertyCodec[A], observing: Observing, config: CanRenderDomMutationConfig, page: Page): ElemFuncWrapper = new ElemFuncWrapper({ elem =>
-      val domProp = dom(config)
-      val s = f(elem.attributes.asAttrMap get domProp.attributeName)
-      val pv = new PropertyVar[A](domProp)(s.now) <<: s
-      pv.render(elem)
-    })
+    def transform[A](f: Option[String] => Signal[A])(implicit codec: PropertyCodec[A], observing: Observing, config: CanRenderDomMutationConfig, page: Page): ElemFuncWrapper =
+      new ElemFuncWrapper({ elem =>
+        val domProp = dom(config)
+        val s = f(elem.attributes.asAttrMap get domProp.attributeName)
+        val pv = new PropertyVar[A](domProp)(s.now) <<: s
+        pv.render(elem)
+      })
 
     /**
      * A PropertyVar initialized with a plain value
@@ -106,7 +109,8 @@ object PropertyVar {
      * @return     A PropertyVar with the specified constant value.
      * @example {{{PropertyVar("size")(80)}}}
      */
-    def apply[A](init: A)(implicit codec: PropertyCodec[A], observing: Observing, config: CanRenderDomMutationConfig): PropertyVar[A] = new PropertyVar[A](dom(config))(init)
+    def apply[A](init: A)(implicit codec: PropertyCodec[A], observing: Observing, config: CanRenderDomMutationConfig): PropertyVar[A] =
+      new PropertyVar[A](dom(config))(init)
   }
 
   /**
@@ -115,6 +119,7 @@ object PropertyVar {
    * @param name the attribute and property name of the DomProperty
    */
   def apply(name: String) = new PropertyVarFactory(name, name)
+
   /**
    * Returns a PropertyVarFactory.
    * @example PropertyVar(name, attrName)(init)
@@ -194,7 +199,9 @@ class PropertyVar[T](val dom: DomProperty)(init: T)(implicit codec: PropertyCode
    * @param init the initial value (rendered in the attribute)
    */
   @deprecated("Use the factory: PropertyVar(name)(init)", "0.2")
-  def this(name: String)(init: T)(implicit codec: PropertyCodec[T], observing: Observing, config: CanRenderDomMutationConfig) = this(DomProperty(name)(config))(init)(codec, observing)
+  def this(name: String)(init: T)(implicit codec: PropertyCodec[T], observing: Observing, config: CanRenderDomMutationConfig) =
+    this(DomProperty(name)(config))(init)(codec, observing)
+
   /**
    * Wraps a new DomProperty as a type-safe Var.
    * @param name the name of the DomProperty to create and wrap
