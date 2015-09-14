@@ -1,10 +1,9 @@
 package reactive
 package web
 
-import scala.xml.{ Elem, MetaData, NodeSeq, Null, UnprefixedAttribute }
-import javascript.{ Assignable, buildJs, CanForwardJs, JsEventStream, JsExp, JsForwardable, JsTypes, window }
+import reactive.web.javascript.{Assignable, CanForwardJs, JsEventStream, JsExp, JsForwardable, JsTypes, buildJs, window}
 
-import scala.ref.WeakReference
+import scala.xml.{Elem, NodeSeq, Null, UnprefixedAttribute}
 
 /**
  * Represents a property and/or attribute of a DOM element, synchronized in from the client to the server
@@ -31,8 +30,8 @@ class DomProperty(val name: String)(implicit config: CanRenderDomMutationConfig)
    */
   def attributeName: String = name
 
-  private val valuesES = new EventSource[String] {}
-  def values: EventStream[String] = valuesES
+  private val valuesES = Var[String](null)
+  def values: EventStream[String] = valuesES.change
 
   private var eventSources = List[DomEventSource[_]]()
   private var includedEvents = List[DomEventSource[_ <: DomEvent]]()
@@ -73,7 +72,7 @@ class DomProperty(val name: String)(implicit config: CanRenderDomMutationConfig)
      * the value Var is updated.
      */
     def propagate(v: String) {
-      valuesES fire v
+      valuesES update v
       // Send to all other pages the javascript to apply the new value,
       // other than the page on which this property started this ajax call
       // since the browser already has that value.
@@ -137,13 +136,13 @@ class DomProperty(val name: String)(implicit config: CanRenderDomMutationConfig)
    * linked events, and recording its id (adding one if necessary).
    * @return the updated Elem.
    */
-  def render(e: Elem)(implicit page: Page): Elem =
-    new PropertyRenderer()(page) apply e
+  def render(e: Elem)(implicit page: Page): Elem = new PropertyRenderer()(page) apply e
 
   protected def updateImpl[A : PropertyCodec](a: A)(pagePred: Page => Boolean): Unit =
+    //do not push updates to client which already has this value
     pageIds
-      .filter{ case (p, _) => pagePred(p) }
-      .foreach{ case (page, id) =>
+      .filter { case (p, _) => pagePred(p) && valuesES.now != String.valueOf(a) }
+      .foreach { case (page, id) =>
         page.queue(DomMutation.UpdateProperty(id, name, attributeName, a))
       }
 
@@ -152,7 +151,7 @@ class DomProperty(val name: String)(implicit config: CanRenderDomMutationConfig)
    */
   def update[T : PropertyCodec](value: T) = updateImpl[T](value)(_ => true)
 
-  override def toString = "DomProperty(name=%s,attributeName=%s)" format (name, attributeName)
+  override def toString = s"DomProperty(name=$name,attributeName=$attributeName)"
 }
 
 object DomProperty {
@@ -169,7 +168,7 @@ object DomProperty {
    * Values are forwarded by calling DomProperty#update with the return value of codec.toJS applied to the value.
    */
   implicit def canForwardTo[T](implicit codec: PropertyCodec[T]): CanForwardTo[DomProperty, T] = new CanForwardTo[DomProperty, T] {
-    def forwarder(d: DomProperty) = d.update
+    def forwarder(d: DomProperty) = d.update _
   }
 
   /**
