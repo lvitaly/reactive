@@ -18,6 +18,7 @@ class EventEncoder[T <: DomEvent](val encodeExp: $[JsObj] => $[JsObj])
 object EventEncoder {
   val empty = Map.empty.$
   implicit val blur: EventEncoder[Blur] = new EventEncoder[Blur](_ => empty)
+  implicit val input: EventEncoder[Input] = new EventEncoder[Input](_ => empty)
   implicit val change: EventEncoder[Change] = new EventEncoder[Change](_ => empty)
   implicit val error: EventEncoder[Error] = new EventEncoder[Error](_ => empty)
   implicit val focus: EventEncoder[Focus] = new EventEncoder[Focus](_ => empty)
@@ -91,6 +92,7 @@ case class Click(modifiers: Modifiers = Modifiers()) extends DomEvent
 case class DblClick(modifiers: Modifiers = Modifiers()) extends DomEvent
 case class Error() extends DomEvent
 case class Focus() extends DomEvent
+case class Input() extends DomEvent
 /**
  * @param code the keyCode or charCode property of the javascript event object
  */
