@@ -17,7 +17,8 @@ object ReactiveBuild extends Build {
       "-doc-title",
       "Scaladocs - scala-reactive", "-groups",
       "-Ydelambdafy:method",
-      "-Ybackend:GenBCode"
+      "-Ybackend:GenBCode",
+      "-target:jvm-1.8"
     ),
     testOptions in Test += Tests.Argument(TestFrameworks.ScalaTest, "-oF"),
     autoAPIMappings := true
