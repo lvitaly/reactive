@@ -2,8 +2,10 @@ package bootstrap.liftweb
 
 import net.liftweb.common.Full
 import net.liftweb.util.Html5
-import net.liftweb.util.Helpers.strToCssBindPromoter
+import net.liftweb.util.Helpers._
 import net.liftweb.http._
+import net.liftweb.markdown.ThreadLocalTransformer
+import net.liftweb.sitemap.Loc._
 import net.liftweb.sitemap._
 import Loc._
 import reactive.web.lift._
@@ -44,7 +46,7 @@ class Boot {
     SseTransportType.init()
     MessagesSnippet.init(Messages.template("alert"))
 
-    val mdParser = new net.liftweb.markdown.ActuariusTransformer
+    val mdParser = new ThreadLocalTransformer
 
     def loadMarkdown(path: String): Elem = {
       val f = s"/site/$path.md"

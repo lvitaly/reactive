@@ -7,9 +7,8 @@ import reactive.web.html._
 
 import scala.xml._
 
-import net.liftweb.util.{ Helpers, BindPlus }
+import net.liftweb.util.Helpers
 import Helpers._
-import BindPlus._
 import net.liftweb.http._
 
 // Extends Observing so any listeners we have can be garbage collected

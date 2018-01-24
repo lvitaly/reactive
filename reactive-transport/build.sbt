@@ -11,4 +11,4 @@ libraryDependencies ++= {
   }
 }
 
-libraryDependencies += "net.liftweb" %% "lift-json" % "2.6.2" exclude("ch.qos.logback","logback-classic")
+libraryDependencies += "net.liftweb" %% "lift-json" % "3.0.2" exclude("ch.qos.logback","logback-classic")

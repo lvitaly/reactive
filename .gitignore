@@ -15,7 +15,7 @@ hs_err*.log
 .history
 jrockit.*.dump
 *.orig
-.settings
+*.settings
 /.idea/
 /.idea_modules/
 .classpath

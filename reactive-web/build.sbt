@@ -2,7 +2,7 @@ name := "reactive-web-base"
 
 description := "FRP-based abstractions to control the browser from the server"
 
-libraryDependencies += "net.liftweb" %% "lift-util" % "2.6.2" exclude("ch.qos.logback","logback-classic")
+libraryDependencies += "net.liftweb" %% "lift-util" % "3.0.2" exclude("ch.qos.logback","logback-classic")
 
 libraryDependencies += "com.lihaoyi" %% "upickle" % "0.2.8"
 

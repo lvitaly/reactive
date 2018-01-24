@@ -14,7 +14,6 @@ object LiftJsonToUpickle {
     case JNull | JNothing => Js.Null
     case JArray(xs)       => Js.Arr(xs map apply: _*)
     case JObject(xs)      => Js.Obj(xs map (f => (f.name, apply(f.value))): _*)
-    case JField(_, _)     => sys.error("JField is not a value")
   }
   def unapply(in: JValue) = Some(apply(in))
   implicit def writer: Writer[JValue] = Writer(apply)
