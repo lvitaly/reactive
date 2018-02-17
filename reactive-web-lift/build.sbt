@@ -2,6 +2,6 @@ name := "reactive-web-lift"
 
 description := "Lift bindings for reactive-web"
 
-libraryDependencies += "net.liftweb" %% "lift-webkit" % "3.0.2" exclude("ch.qos.logback","logback-classic")
+libraryDependencies += "net.liftweb" %% "lift-webkit" % Dependencies.liftVersion
 
-libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.5" % "test"
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.3" % "test"

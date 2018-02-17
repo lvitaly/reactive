@@ -14,7 +14,6 @@ import net.liftweb.http.js.{ JsCmd, JsCmds }
 import reactive.logging.HasLogger
 
 class LiftCometTransportType(page: Page) extends TransportType with HasLogger {
-
   class PageComet extends CometActor {
     // Make initCometActor accessible
     override protected[web] def initCometActor(cci: CometCreationInfo): Unit = super.initCometActor(cci)

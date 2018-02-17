@@ -2,7 +2,8 @@ package reactive
 package web
 
 import net.liftweb.json._
-import upickle._
+import upickle.Js
+import upickle.default._
 
 object LiftJsonToUpickle {
   def apply(in: JValue): Js.Value = in match {
@@ -40,7 +41,7 @@ object AjaxCall {
   private def addHandler(id: String)(pf: PartialFunction[Seq[Js.Value], Unit])(implicit page: Page) = {
     import page.observing
     page.ajaxEvents ?>> {
-      case (`id`, LiftJsonToUpickle(Js.Arr(xs @ _*))) if(pf.isDefinedAt(xs)) =>
+      case (`id`, LiftJsonToUpickle(Js.Arr(xs @ _*))) if pf isDefinedAt xs =>
         pf(xs)
     }
   }

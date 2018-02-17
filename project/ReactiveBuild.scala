@@ -10,6 +10,7 @@ object ReactiveBuild {
     resolvers += Resolver.sonatypeRepo("snapshots") ,
     checksums in update := Nil,
     scalacOptions in (Compile, doc) ++= Seq(
+      "-target:jvm-1.8",
       "-sourcepath",
       baseDirectory.value.getAbsolutePath,
       "-doc-source-url",
